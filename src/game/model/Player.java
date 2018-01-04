@@ -1,5 +1,6 @@
 package game.model;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -10,13 +11,6 @@ public class Player {
     protected final String name;
     protected Set<Rule> rules;
 
-
-    public static String[] parsePlayersNames(String line){
-        if (line.contains("{") && line.contains("}")){
-            line = line.substring(line.indexOf("{") + 1, line.indexOf("}"));
-        }
-        return line.replace(" ", "").split("∧|/\\\\|,");
-    }
 
     public Player(String name) {
         this.name = name;
@@ -33,6 +27,14 @@ public class Player {
 
     public void addRule(Rule rule){
         this.rules.add(rule);
+    }
+
+    public BigDecimal calculateShapley() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (Rule rule : rules) {
+            total = total.add(rule.getShapleyVal(this));
+        }
+        return total;
     }
 
     @Override

@@ -1,31 +1,44 @@
 package game;
 
+import UI.ConsoleUI;
 import game.exceptions.EmptyNameException;
 import game.model.Player;
 import game.model.PlayerFactory;
 import game.model.Rule;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GameController {
 
-    public static void initializePlayers(String line) throws EmptyNameException {
-        for (String name : Player.parsePlayersNames(line)) {
-            PlayerFactory.getPlayer(name);
-        }
-    }
-
     public static void initializeRule(String line) throws EmptyNameException {
-        String[] playersNames = Player.parsePlayersNames(line);
-        BigInteger playersInRule = new BigInteger(Integer.toString(playersNames.length));
-        Rule rule = new Rule(line, playersInRule, Rule.parseValue(line));
-        mapRuleToPlayers(rule, playersNames);
+        Map<Boolean, List<Player>> literals = PlayerFactory.parsePlayers(line);
+        Rule rule = new Rule(line, literals.get(true), literals.get(false), Rule.parseValue(line));
+
+        List<Player> allPlayers = new ArrayList<>(literals.get(true));
+        allPlayers.addAll(literals.get(false));
+
+        addRuleToPlayers(rule, allPlayers);
     }
 
-    private static void mapRuleToPlayers(Rule rule, String[] pNames) throws EmptyNameException {
-        for (String name : pNames) {
-            Player p = PlayerFactory.getPlayer(name);
+    private static void addRuleToPlayers(Rule rule, List<Player> players) {
+        for (Player p : players) {
             p.addRule(rule);
         }
+
+    }
+
+    public static void calculateShapley(){
+        Map<Player, BigDecimal> shapley = new HashMap<>();
+
+        for (Player p : PlayerFactory.getPlayers()) {
+            shapley.put(p, p.calculateShapley());
+        }
+
+        ConsoleUI.printf(shapley);
+        PlayerFactory.refresh();
     }
 }

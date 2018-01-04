@@ -17,10 +17,8 @@ public class App {
         initialize();
         while (true){
             try {
-                askForPlayers();
-                displayPlayers();
                 askForRules();
-                displayResult();
+                displayRulesPerPlayers();
             }
             catch (Exception ex){
                 print(ex.getMessage());
@@ -29,17 +27,19 @@ public class App {
     }
 
     private static void initialize() {
-        print("App is launched. Type \"exit\" to exit the app.");
-        printf("****************** Started ******************%n%n");
-    }
-
-    public static void askForPlayers() throws EmptyNameException {
-        print("Enter players separated by comma (e.g. Ben, John):");
-        GameController.initializePlayers(readLine());
+        printf("************************************* Started ************************************%n%n");
+        printf(">> All rules should be entered using the following syntax: \"{Ben /\\ ¬John} -> 5\".%n");
+        print("Player names are case-insensitive (e.g \"Ben\" is the same as \"ben\").");
+        print("Symbols allowed to represent conjunction: \"∧\", \"/\\\"(slash and backslash).");
+        print("Allowed arrows: \"→\", \"=>\". \"->\".");
+        print("Allowed negation symbols: \"¬\", \"-\", \"!\".");
+        print("Only one symbol of a particular type can be used.");
+        print("Empty line indicates the end of the input.");
+        printf(">> Type \"exit\" to exit the app.%n%n");
     }
 
     private static void displayPlayers() {
-        printf("%n>> Created players: { ");
+        print("Created players: { ");
         for (Player p : PlayerFactory.getPlayers()) {
             printf(p + " ");
         }
@@ -47,14 +47,7 @@ public class App {
     }
 
     public static void askForRules() throws EmptyNameException {
-        printf("%n>> All rules should be entered using the following syntax: \"{Ben /\\ ¬John} -> 5\".%n");
-        print(">> Player names are case-insensitive (e.g \"Ben\" is the same as \"ben\").");
-        print(">> Symbols allowed to represent conjunction: \"∧\", \"/\\\"(slash and backslash).");
-        print(">> Allowed arrows: \"→\", \"=>\". \"->\".");
-        print(">> Allowed negation symbols: \"¬\", \"˜\", \"!\".");
-        print(">> Only one symbol of a particular type can be used.");
-        print(">> Empty line indicates the end of the input.");
-        print("Enter rules:");
+        printf("Enter rules:%n");
 
         String line = null;
 
@@ -63,14 +56,19 @@ public class App {
         }
     }
 
-    public static void displayResult(){
+
+
+    public static void displayRulesPerPlayers(){
         //todo
         for (Player p : PlayerFactory.getPlayers()) {
-            System.out.printf("%nPlayer %s:%n", p);
+            System.out.printf("Player %s:%n", p);
             for (Rule rule: p.getRules()){
                 System.out.println(rule);
-                System.out.println();
             }
+            System.out.println();
         }
+
+        GameController.calculateShapley();
     }
+
 }

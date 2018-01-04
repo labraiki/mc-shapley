@@ -11,7 +11,7 @@ public class ConsoleUI {
         String line = sc.nextLine();
 
         if (line.equals("exit")){
-            printf("%n****************** Goodbye ******************");
+            System.out.println("%n************************************* Goodbye ************************************");
             System.exit(0);
         }
 
@@ -19,7 +19,7 @@ public class ConsoleUI {
     }
 
     public static void print(Object o){
-        System.out.println(o.toString());
+        System.out.printf(">> %s%n", o.toString());
     }
 
     public static void printf(Object o){
