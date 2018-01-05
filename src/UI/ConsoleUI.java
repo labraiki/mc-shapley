@@ -6,7 +6,6 @@ public class ConsoleUI {
 
     private static Scanner sc = new Scanner(System.in);
 
-
     public static String readLine(){
         String line = sc.nextLine();
 

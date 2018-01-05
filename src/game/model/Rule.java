@@ -1,8 +1,11 @@
 package game.model;
 
+import game.exceptions.InvalidPatternException;
+
 import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 
 public class Rule {
 
@@ -10,12 +13,18 @@ public class Rule {
     protected final List<Player> posLiterals;
     protected final List<Player> negLiterals;
     protected final BigDecimal value;
-    protected final BigDecimal posShapV;
-    protected final BigDecimal negShapV;
+    protected final double posShapV;
+    protected final double negShapV;
 
 
-    public static BigDecimal parseValue(String line){
-        line = line.replaceAll("→|=>|->", "=").replace(" ", "");
+    public static BigDecimal parseValue(String line) throws InvalidPatternException {
+        line = line.replace(" ", "");
+
+        if (!line.matches("\\{\\w*((&|/\\\\)(~|-|!)*\\w+)*\\}(=>|->|=)\\d+")){
+            throw new InvalidPatternException("Input does not match the rule's syntax! Syntax: \"{Ben /\\ !John} -> 5\" (without quotes).");
+        }
+
+        line = line.replaceAll("(=>|->|=)", "=");
         String value = line.substring(line.indexOf("=") + 1);
         return new BigDecimal(value);
     }
@@ -42,12 +51,12 @@ public class Rule {
         this.negShapV = calculateShapV(false);
     }
 
-    private BigDecimal calculateShapV(boolean positive){
+    private double calculateShapV(boolean positive){
         long p = posLiterals.size();
         long n = negLiterals.size();
 
         if (positive && p == 0 || !positive && n == 0)
-            return BigDecimal.ZERO;
+            return 0.0;
 
         long facN = factorial(n);
         long facP = factorial(p);
@@ -57,26 +66,48 @@ public class Rule {
 
         BigDecimal denominator = new BigDecimal(factorial(p + n));
 
-        return numerator.divide(denominator);
+        return round(numerator.doubleValue()/denominator.doubleValue(), 2);
     }
 
-    public BigDecimal getShapleyVal(Player player) {
-        BigDecimal total = BigDecimal.ZERO;
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public double getShapleyVal(Player player) {
+        double total = 0.0;
 
         if (posLiterals.contains(player)){
-            total = total.add(posShapV);
+            total += posShapV;
         }
 
         if (negLiterals.contains(player)){
-            total = total.add(negShapV);
+            total += negShapV;
         }
 
         return total;
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Rule rule = (Rule) o;
+        return posLiterals.equals(rule.posLiterals) && negLiterals.equals(rule.negLiterals);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(posLiterals, negLiterals);
+    }
+
+    @Override
     public String toString() {
-        return String.format("Rule %s [p = %d, n = %d, value = %s, positive ShapVal  = %s, negative ShapVal = %s]",
+        return String.format("Rule: %-20s p = %-2d n = %-2d value = %-10s positive literal ShapVal  = %-10s negative literal ShapVal = %-10s",
                             pattern, posLiterals.size(), negLiterals.size(), value, posShapV, negShapV);
     }
 }

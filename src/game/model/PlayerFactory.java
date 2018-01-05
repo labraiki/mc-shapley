@@ -1,18 +1,17 @@
 package game.model;
 
-import game.exceptions.EmptyNameException;
+import game.exceptions.InvalidPatternException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class PlayerFactory {
 
     private static List<Player> players = new ArrayList<>();
 
 
-    public static Player getPlayer(String name) throws EmptyNameException {
+    public static Player getPlayer(String name) throws InvalidPatternException {
         
         if (name == null || name.isEmpty()) {
-            throw new EmptyNameException();
+            throw new InvalidPatternException("Player's name cannot be empty!");
         }
 
         for (Player p : players) {
@@ -31,7 +30,13 @@ public class PlayerFactory {
         return Collections.unmodifiableList(players);
     }
 
-    public static Map<Boolean, List<Player>> parsePlayers(String line) throws EmptyNameException {
+    public static Map<Boolean, List<Player>> parsePlayers(String line) throws InvalidPatternException {
+        line = line.replace(" ", "");
+
+        if (!line.matches("\\{\\w*((&|/\\\\)(~|-|!)*\\w+)*\\}(=>|->|=)\\d+")){
+            throw new InvalidPatternException("Input is not valid! Syntax: \"{Ben /\\ !John} -> 5\" (without quotes).");
+        }
+
         if (line.contains("{") && line.contains("}")){
             line = line.substring(line.indexOf("{") + 1, line.indexOf("}"));
         }
@@ -40,7 +45,7 @@ public class PlayerFactory {
         players.put(true, new ArrayList<>());
         players.put(false, new ArrayList<>());
 
-        String[] names = line.replace(" ", "").split("∧|/\\\\|,");
+        String[] names = line.split("&|/\\\\");
         for (String name : names) {
             boolean isPositive = !isNegated(name);
             name = isPositive ? name : name.substring(1);
@@ -51,7 +56,7 @@ public class PlayerFactory {
     }
 
     private static boolean isNegated(String playerName){
-        return playerName.matches("^(¬|-|!)[a-zA-Z0-9_]*");
+        return playerName.matches("^(~|-|!)[a-zA-Z0-9_]*");
     }
 
     public static void refresh(){

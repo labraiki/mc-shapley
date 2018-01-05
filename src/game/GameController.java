@@ -1,7 +1,8 @@
 package game;
 
 import UI.ConsoleUI;
-import game.exceptions.EmptyNameException;
+import game.exceptions.InvalidPatternException;
+import game.exceptions.RuleExistsException;
 import game.model.Player;
 import game.model.PlayerFactory;
 import game.model.Rule;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class GameController {
 
-    public static void initializeRule(String line) throws EmptyNameException {
+    public static void initializeRule(String line) throws InvalidPatternException, RuleExistsException {
         Map<Boolean, List<Player>> literals = PlayerFactory.parsePlayers(line);
         Rule rule = new Rule(line, literals.get(true), literals.get(false), Rule.parseValue(line));
 
@@ -24,7 +25,7 @@ public class GameController {
         addRuleToPlayers(rule, allPlayers);
     }
 
-    private static void addRuleToPlayers(Rule rule, List<Player> players) {
+    private static void addRuleToPlayers(Rule rule, List<Player> players) throws RuleExistsException {
         for (Player p : players) {
             p.addRule(rule);
         }
@@ -38,7 +39,13 @@ public class GameController {
             shapley.put(p, p.calculateShapley());
         }
 
+        ConsoleUI.print("Shapley value of the game:");
         ConsoleUI.printf(shapley);
+        ConsoleUI.printf("%n********************************************************************************");
+        refresh();
+    }
+
+    public static void refresh(){
         PlayerFactory.refresh();
     }
 }

@@ -1,5 +1,7 @@
 package game.model;
 
+import game.exceptions.RuleExistsException;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,14 +27,17 @@ public class Player {
         return name;
     }
 
-    public void addRule(Rule rule){
+    public void addRule(Rule rule) throws RuleExistsException {
+        if (rules.contains(rule)){
+            throw new RuleExistsException("Rule with such literals already exists!");
+        }
         this.rules.add(rule);
     }
 
     public BigDecimal calculateShapley() {
         BigDecimal total = BigDecimal.ZERO;
         for (Rule rule : rules) {
-            total = total.add(rule.getShapleyVal(this));
+            total = total.add(BigDecimal.valueOf(rule.getShapleyVal(this)));
         }
         return total;
     }
