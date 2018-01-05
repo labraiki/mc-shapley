@@ -1,4 +1,4 @@
 package game.exceptions;
 
-public class InvalidPatternException {
+public class EmptyNameException extends Exception {
 }
